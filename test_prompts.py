@@ -1,22 +1,69 @@
+"""
+Module: test_prompts.py
+Visualization of LLM fine-tuning convergence (Cross-Entropy Loss and Perplexity).
+"""
+
+import math
+from typing import Dict, List, Optional
 from matplotlib import pyplot as plt
 
-def plot_metrics(history):
-    epochs = range(1, len(history['loss'])+1)
-    plt.figure()
-    plt.plot(epochs, history['loss'], label='Train Loss')
-    plt.plot(epochs, history['val_loss'], label='Validation Loss')
-    plt.title('Loss por Epoch')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
 
-    # Perplexity = exp(loss)
-    plt.figure()
-    plt.plot(epochs, [math.exp(l) for l in history['loss']], label='Train Perplexity')
-    plt.plot(epochs, [math.exp(l) for l in history['val_loss']], label='Val Perplexity')
-    plt.title('Perplexity por Epoch')
-    plt.xlabel('Epoch')
-    plt.ylabel('Perplexity')
-    plt.legend()
-    plt.show()
+def plot_metrics(
+    history: Dict[str, List[float]],
+    save_path: Optional[str] = None,
+    show: bool = True,
+) -> None:
+    """
+    Plot and visualize training/validation loss alongside model perplexity.
+
+    Args:
+        history: Dictionary containing 'loss' and 'val_loss' float lists.
+        save_path: Optional output image file path to save plot.
+        show: Whether to invoke plt.show().
+    """
+    if "loss" not in history or "val_loss" not in history:
+        raise ValueError("History dictionary must contain 'loss' and 'val_loss' keys.")
+
+    epochs = list(range(1, len(history["loss"]) + 1))
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+    # Loss plot
+    ax1.plot(epochs, history["loss"], label="Train Loss", color="#0284c7", linewidth=2)
+    ax1.plot(epochs, history["val_loss"], label="Validation Loss", color="#f43f5e", linewidth=2, linestyle="--")
+    ax1.set_title("Cross-Entropy Loss per Epoch", fontsize=12, fontweight="bold")
+    ax1.set_xlabel("Epoch", fontsize=10)
+    ax1.set_ylabel("Loss", fontsize=10)
+    ax1.grid(True, linestyle=":", alpha=0.6)
+    ax1.legend()
+
+    # Perplexity plot: PPL = exp(Cross-Entropy Loss)
+    train_ppl = [math.exp(min(l, 20.0)) for l in history["loss"]]
+    val_ppl = [math.exp(min(l, 20.0)) for l in history["val_loss"]]
+
+    ax2.plot(epochs, train_ppl, label="Train Perplexity", color="#0284c7", linewidth=2)
+    ax2.plot(epochs, val_ppl, label="Validation Perplexity", color="#f43f5e", linewidth=2, linestyle="--")
+    ax2.set_title("Perplexity per Epoch", fontsize=12, fontweight="bold")
+    ax2.set_xlabel("Epoch", fontsize=10)
+    ax2.set_ylabel("Perplexity", fontsize=10)
+    ax2.grid(True, linestyle=":", alpha=0.6)
+    ax2.legend()
+
+    plt.tight_layout()
+
+    if save_path:
+        plt.savefig(save_path, dpi=300)
+
+    if show:
+        plt.show()
+
+
+if __name__ == "__main__":
+    # Synthetic convergence metrics for demonstration
+    sample_history = {
+        "loss": [3.45, 2.91, 2.45, 2.12, 1.89, 1.72],
+        "val_loss": [3.55, 3.05, 2.62, 2.35, 2.18, 2.09],
+    }
+    print("Generating sample training curves and perplexity metrics...")
+    plot_metrics(sample_history, save_path="metrics_plot.png", show=False)
+    print("Generated metrics_plot.png successfully.")
