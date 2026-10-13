@@ -1,34 +1,17 @@
-"""
-Module: test_prompts.py
-Visualization of LLM fine-tuning convergence (Cross-Entropy Loss and Perplexity).
-"""
-
 import math
-from typing import Dict, List, Optional
+
 from matplotlib import pyplot as plt
 
 
-def plot_metrics(
-    history: Dict[str, List[float]],
-    save_path: Optional[str] = None,
-    show: bool = True,
-) -> None:
-    """
-    Plot and visualize training/validation loss alongside model perplexity.
-
-    Args:
-        history: Dictionary containing 'loss' and 'val_loss' float lists.
-        save_path: Optional output image file path to save plot.
-        show: Whether to invoke plt.show().
-    """
+def plot_metrics(history: dict[str, list[float]], save_path: str | None = None, show: bool = True):
+    """Grafica loss y perplexity de train/val a partir de un dict con 'loss' y 'val_loss'."""
     if "loss" not in history or "val_loss" not in history:
-        raise ValueError("History dictionary must contain 'loss' and 'val_loss' keys.")
+        raise ValueError("history necesita las claves 'loss' y 'val_loss'")
 
     epochs = list(range(1, len(history["loss"]) + 1))
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
-    # Loss plot
     ax1.plot(epochs, history["loss"], label="Train Loss", color="#0284c7", linewidth=2)
     ax1.plot(epochs, history["val_loss"], label="Validation Loss", color="#f43f5e", linewidth=2, linestyle="--")
     ax1.set_title("Cross-Entropy Loss per Epoch", fontsize=12, fontweight="bold")
@@ -37,7 +20,7 @@ def plot_metrics(
     ax1.grid(True, linestyle=":", alpha=0.6)
     ax1.legend()
 
-    # Perplexity plot: PPL = exp(Cross-Entropy Loss)
+    # ppl = exp(loss), el min evita overflow con loss muy altos
     train_ppl = [math.exp(min(l, 20.0)) for l in history["loss"]]
     val_ppl = [math.exp(min(l, 20.0)) for l in history["val_loss"]]
 
@@ -59,11 +42,10 @@ def plot_metrics(
 
 
 if __name__ == "__main__":
-    # Synthetic convergence metrics for demonstration
+    # datos de ejemplo, no es un entrenamiento real
     sample_history = {
         "loss": [3.45, 2.91, 2.45, 2.12, 1.89, 1.72],
         "val_loss": [3.55, 3.05, 2.62, 2.35, 2.18, 2.09],
     }
-    print("Generating sample training curves and perplexity metrics...")
     plot_metrics(sample_history, save_path="metrics_plot.png", show=False)
-    print("Generated metrics_plot.png successfully.")
+    print("guardado metrics_plot.png")
