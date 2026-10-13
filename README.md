@@ -1,82 +1,47 @@
-<div align="center">
+# ml-prompt-engineering
 
-  <h1>ml-prompt-engineering</h1>
-  <p><strong>LLM Prompt Engineering, Inference Pipelines & Fine-Tuning Convergence Telemetry</strong></p>
+Dos scripts chicos para jugar con modelos de lenguaje: un wrapper para generar texto con cualquier modelo causal de HuggingFace (gpt2 por defecto) y un script que grafica loss y perplexity de un entrenamiento.
 
-  <p>
-    <img src="https://img.shields.io/badge/Language-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
-    <img src="https://img.shields.io/badge/Framework-HuggingFace_Transformers-FFD21E?style=flat-square&logo=huggingface&logoColor=black" alt="HuggingFace" />
-    <img src="https://img.shields.io/badge/Backend-PyTorch_2.0+-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch" />
-    <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
-  </p>
-
-</div>
-
----
-
-### Overview
-
-`ml-prompt-engineering` provides modular Python tooling for causal language model inference, prompt parameter tuning (temperature, nucleus sampling), and visualization of LLM training convergence metrics (Cross-Entropy Loss vs. Perplexity).
-
-Key features:
-- **Accelerated Ingestion:** Automatic hardware acceleration detection (`cuda`, `mps`, `cpu`).
-- **Configurable Sampling:** Explicit control over `temperature`, `top_p`, and maximum token length.
-- **Evaluation Telemetry:** Automatic computation and plotting of model perplexity alongside loss curves ($PPL = e^{Loss}$).
-
----
-
-### Repository Layout
-
-```text
-ml-prompt-engineering/
-├── src/
-│   └── prompts.py        # Core causal LM inference and generation wrapper
-├── test_prompts.py       # Loss and perplexity visualization evaluator
-├── requirements.txt      # Pinned production dependencies
-└── README.md
-```
-
----
-
-### Quickstart
-
-#### 1. Environment Setup
+## Como probarlo
 
 ```bash
-# Create and activate a Python virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
+source .venv/bin/activate   # en Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-#### 2. Model Inference
+Necesita Python 3.10 o superior.
+
+Generar texto:
 
 ```python
 from src.prompts import generate_completion
 
-prompt = "Explain the difference between Kubernetes and Docker in simple terms:"
-response = generate_completion(
-    prompt=prompt,
-    model_name="gpt2",
+print(generate_completion(
+    "Explain the difference between Kubernetes and Docker in simple terms:",
     max_new_tokens=80,
-    temperature=0.7
-)
-
-print(response)
+    temperature=0.7,
+))
 ```
 
-#### 3. Metric Plotting & Convergence Analysis
+Usa GPU si hay (`cuda` o `mps` en Mac), si no cae a CPU. La primera vez baja el modelo de HuggingFace. `max_new_tokens` cuenta solo los tokens generados, no el prompt.
 
-Run the evaluation script to visualize loss curves and perplexity trends:
+Graficar metricas con datos de ejemplo:
 
 ```bash
-python test_prompts.py
+python plot_metrics.py
 ```
 
----
+Guarda `metrics_plot.png` con dos paneles: loss por epoca y perplexity (`exp(loss)`). Para usar tus propios datos importa `plot_metrics` y pasale un dict con `loss` y `val_loss`.
 
-### License
+## Estructura
 
-Distributed under the MIT License. Developed and maintained by [Brandon Mendieta](https://github.com/NeoScraids).
+```
+src/prompts.py     generacion de texto
+plot_metrics.py    graficas de loss y perplexity
+requirements.txt
+```
+
+## Licencia
+
+MIT
