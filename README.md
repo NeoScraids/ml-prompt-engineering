@@ -60,7 +60,7 @@ prompt = "Explain the difference between Kubernetes and Docker in simple terms:"
 response = generate_completion(
     prompt=prompt,
     model_name="gpt2",
-    max_length=80,
+    max_new_tokens=80,
     temperature=0.7
 )
 
